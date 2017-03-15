@@ -1,0 +1,161 @@
+[color]
+	ui = true
+    branch = auto
+    diff = auto
+    status = auto
+[color "branch"]
+    current = red reverse
+    local = blue
+    remote = green
+[color "diff"]
+    meta = yellow
+    frag = magenta
+    old = red bold
+    new = green
+    plain = white
+[color "status"]
+    added = yellow
+    changed = green
+    untracked = cyan
+[push]
+	default = tracking
+[log]
+	date = local
+[branch]
+	autosetuprebase = always
+[rebase]
+	autosquash = true
+[user]
+	email = Jorge.Bernal@wnco.com
+	name = jorge.bernal
+[mergetool]
+	keepBackup = false
+[diff]
+	tool = meld
+[rerere]
+  enabled = true
+[rebase]
+  autosquash = true
+[filter "lfs"]
+	clean = git-lfs clean %f
+	smudge = git-lfs smudge %f
+	required = true
+
+# Aliases
+[alias]
+	sc = svn dcommit
+	sr = svn rebase
+	ci = commit -m
+	glog = log
+	# basic {{{
+    st = status -s
+    cl = clone
+    ci = commit
+    co = checkout
+    br = branch
+    r = reset
+    cp = cherry-pick
+    gr = grep -Ii
+    # }}}
+
+    # Get the current branch name
+	bn = "!git rev-parse --abbrev-ref HEAD"
+	# Add description to the branch
+	brd = "!git branch --edit-description"
+    # create new branch
+	cob = checkout -b
+	# Checkout master
+	com = checkout master
+	# push your current branch
+	ps = "!git push origin \"$(git rev-parse --abbrev-ref HEAD)\""
+	# pull your current branch
+   	pl = "!git pull origin \"$(git rev-parse --abbrev-ref HEAD)\""
+	# pull master branch
+	plm = pull origin master
+
+    # commit {{{
+    cm = !git add -A && git commit -m
+    cma = commit -a -m
+    ca = commit --amend
+    amend = commit --amend
+    # amend the last commit with everything I have here uncommited and new
+	caa = commit -a --amend -C HEAD
+    # }}}
+
+    # log commands {{{
+    ls = log --pretty=format:"%C(green)%h\\ %C(yellow)[%ad]%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+    ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+    fl = log -u
+    # }}}
+
+    # diff {{{
+    d = diff --word-diff
+    dc = diff --cached
+    # diff last commit
+    dlc = diff --cached HEAD^
+    dr  = "!f() { git diff -w "$1"^.."$1"; }; f"
+    diffr  = "!f() { git diff "$1"^.."$1"; }; f"
+    # Fire up your difftool with all the changes that are on the current branch.
+	dt = difftool
+    # }}}
+
+    # reset commands {{{
+    r1 = reset HEAD^
+    r2 = reset HEAD^^
+    rh = reset --hard
+    rh1 = reset HEAD^ --hard
+    rh2 = reset HEAD^^ --hard
+    # }}}
+
+    # stash {{{
+    sl = stash list
+    sa = stash apply
+    ss = stash save
+    # }}}
+
+    # conflict/merges {{{
+    # Checkout our version of a file and add it
+	ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+	# Checkout their version of a file and add it
+	theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+	# }}}
+
+	# list all aliases
+    la = "!git config -l | grep alias | cut -c 7-"
+    # }}}
+
+
+	# Delete the remote version of the current branch
+	unpublish = "!git push origin :$(git branch-name)"
+	# Delete a branch and recreate it from master — useful if you have, say,
+	# a development branch and a master branch and they could conceivably go
+	# out of sync
+	recreate = "!f() { [[ -n $@ ]] && git checkout \"$@\" && git unpublish && git checkout master && git branch -D \"$@\" && git checkout -b \"$@\" && git publish; }; f"
+	# Given a merge commit, find the span of commits that exist(ed)
+	# Not so useful in itself, but used by other aliases.
+	merge-span = "!f() { echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); }; f"
+	# Find the commits that were introduced by a merge
+	merge-log = "!git log `git merge-span .. $1`"
+	# Show the changes that were introduced by a merge
+	merge-difftool = "!git difftool `git merge-span ... $1`"
+	# Interactively rebase all the commits on the current branch
+	rbm = "!git rebase -i `git merge-base master HEAD`"
+
+	#
+	# Working with files
+	#
+
+	# Unstage any files that have been added to the staging area
+	unstage = reset HEAD
+	# Show changes that have been staged
+	diffc = diff --cached
+	# Mark a file as "assume unchanged", which means that Git will treat it
+	# as though there are no changes to it even if there are. Useful for
+	# temporary changes to tracked files
+	assume = update-index --assume-unchanged
+	# Reverse the above
+	unassume = update-index --no-assume-unchanged
+	# Show the files that are currently assume-unchanged
+	assumed = "!git ls-files -v | grep ^h | cut -c 3-"
+	# Delete any branches that have been merged into master
+	delete-merged-branches = "!git co master && git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d"
